@@ -24,25 +24,28 @@ function App() {
   // Escuchar mensajes del content script
   useEffect(() => {
     const handleMessages = (message, sender, sendResponse) => {
-      console.log("Mensaje recibido:", message);
+      console.log("Mensaje recibido en App.jsx:", message);
       if (message.action === "selectionConfirmed" || message.action === "selectionCancelled") {
         console.log("Selección completada o cancelada, reseteando estado");
         setScriptInjected(false);
       }
-      if (message.action === "imgurUrlReady") {
-        console.log("URL de la imagen lista:", message.url);
+      if (message.action === "imgReady") {
+        console.log("URL de la imagen actualizada:", message.url);
         setImageUrl(message.url);
         saveData('imageUrl', message.url);
-        
       }
       return false;
     };
   
+    // Agregar el listener de mensajes
     chrome.runtime.onMessage.addListener(handleMessages);
+  
+    // Limpiar el listener cuando el componente se desmonta
     return () => {
       chrome.runtime.onMessage.removeListener(handleMessages);
     };
   }, []);
+  
 
   // Recuperar datos al montar el componente
   useEffect(() => {
@@ -66,7 +69,6 @@ function App() {
         });
         setScriptInjected(true);
         console.log("Script inyectado o reinicializado");
-
         // Enviar la imagen capturada al script de contenido
         chrome.tabs.sendMessage(tab.id, { action: "enableSelection", imageUrl });
       });
@@ -90,7 +92,7 @@ function App() {
         </button>
         {imageUrl && (
           <div>
-            <h2>Imagen subida:</h2>
+            <h2>Última Imagen subida:</h2>
             <img src={imageUrl} alt="Imagen subida" />
             <p>URL de la imagen: {imageUrl}</p>
           <h1>Catálogo de ropa</h1>

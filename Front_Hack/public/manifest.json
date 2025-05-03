@@ -13,17 +13,15 @@
     "scripting",
     "storage",
     "tabs",
-    "offscreen",
-    "http://*/",
-    "https://*/"
+    "offscreen"
   ],
+  "background": {
+    "service_worker": "background.js"
+  },
   "icons": {
     "128": "icon.png"
   },
   "host_permissions": [
     "<all_urls>"
-  ],
-  "background": {
-    "service_worker": "background.js"
-  }
+  ]
 }

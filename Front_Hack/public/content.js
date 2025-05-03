@@ -149,15 +149,29 @@ if (window._extensionScriptLoaded) {
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement("canvas");
-        canvas.width = coords.width;
-        canvas.height = coords.height;
+  
+        // Ajuste por escala (caso típico: retina o pantallas con zoom)
+        const scaleX = img.width / window.innerWidth;
+        const scaleY = img.height / window.innerHeight;
+  
+        const x = (coords.x + window.scrollX) * scaleX;
+        const y = (coords.y + window.scrollY) * scaleY;
+        const width = coords.width * scaleX;
+        const height = coords.height * scaleY;
+  
+        canvas.width = width;
+        canvas.height = height;
+  
         const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, coords.x, coords.y, coords.width, coords.height, 0, 0, coords.width, coords.height);
+        ctx.drawImage(img, x, y, width, height, 0, 0, width, height);
+  
         resolve(canvas.toDataURL("image/png"));
       };
       img.src = dataUrl;
     });
   }
+  
+  
 
   function dataURLtoBlob(dataUrl) {
     // Verificar si el Data URL está bien formado
@@ -225,13 +239,7 @@ if (window._extensionScriptLoaded) {
       if (result.success) {
         const publicUrl = result.data.link;
         console.log("✅ Imagen subida:", publicUrl);
-        chrome.runtime.sendMessage({ action: "openPopup" });
-        // Enviar la URL de la imagen al background script o popup
-        chrome.runtime.sendMessage({
-          action: "imgurUrlReady",
-          url: publicUrl
-        });
-
+        chrome.runtime.sendMessage({ action: "openPopup", url: publicUrl });
       } else {
         console.error("❌ Error al subir a Imgur:", result);
       }
