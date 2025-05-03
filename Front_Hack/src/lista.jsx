@@ -17,22 +17,24 @@ function getFifthImage(url) {
 
 function ListaPrendas({ imageUrl }) {
   const [prendas, setPrendas] = useState([]);
-  const [loading, setLoading] = useState(true); // Estado de carga
+  const [loading, setLoading] = useState(true);
+  const [mostrarTodo, setMostrarTodo] = useState(false); // 👈 Nuevo estado
 
   useEffect(() => {
-    setLoading(true); // Iniciar carga
+    setLoading(true);
+    setMostrarTodo(false); // 👈 Reinicia vista al cambiar la imagen
     chrome.runtime.sendMessage({ action: "cargalistaropa", imageUrl: imageUrl });
 
     const handleMessages = async (message) => {
       if (message.action === "listaCargada") {
         const updatedPrendas = await Promise.all(
           message.lista.map(async (prenda) => {
-            const imagen = await getFifthImage(prenda.link); // Obtener la quinta imagen
-            return { ...prenda, imagen }; // Añadir la imagen a la prenda
+            const imagen = await getFifthImage(prenda.link);
+            return { ...prenda, imagen };
           })
         );
         setPrendas(updatedPrendas);
-        setLoading(false); // Finaliza carga al recibir datos
+        setLoading(false);
       }
     };
 
@@ -42,24 +44,37 @@ function ListaPrendas({ imageUrl }) {
     };
   }, [imageUrl]);
 
+  const prendasParaMostrar = mostrarTodo ? prendas : prendas.slice(0, 5); // 👈 Controla la vista parcial
+
   return (
     <div>
       <h2>Prendas disponibles</h2>
       {loading ? (
         <div className="loader">Cargando...</div>
       ) : (
-        prendas.map(prenda => (
-          <div key={prenda.id} style={{ marginBottom: '1rem' }} className='card'>
-            <img src={prenda.imagen} alt={prenda.nombre} style={{ width: '100px', height: 'auto' }} />
-            <h3>{prenda.nombre}</h3>
-            <p>Precio: €{prenda.precio.toFixed(2)}</p>
-            <p>Marca: {prenda.marca}</p>
-            <a href={prenda.link} target="_blank" rel="noopener noreferrer">Ver producto</a>
-          </div>
-        ))
+        <>
+          {prendasParaMostrar.map(prenda => (
+            <div key={prenda.id} style={{ marginBottom: '1rem' }} className='card'>
+              <img src={prenda.imagen} alt={prenda.nombre} style={{ width: '100px', height: 'auto' }} />
+              <h3>{prenda.nombre}</h3>
+              <p>Precio: €{prenda.precio.toFixed(2)}</p>
+              <p>Marca: {prenda.marca}</p>
+              <a href={prenda.link} target="_blank" rel="noopener noreferrer">Ver producto</a>
+            </div>
+          ))}
+          {prendas.length > 5 && (
+            <button
+              onClick={() => setMostrarTodo(!mostrarTodo)}
+              className="text-blue-600 hover:underline focus:outline-none mt-2"
+            >
+              {mostrarTodo ? 'Ver menos' : 'Ver más'}
+            </button>
+          )}
+        </>
       )}
     </div>
   );
 }
+
 
 export default ListaPrendas;
