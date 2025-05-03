@@ -85,8 +85,7 @@ useEffect(() => {
         </a>
         
       </div>
-      <h1>Encarni-chaaaan</h1>
-      <div className="card">
+      <div>
         <button onClick={handleSelect}>
           Seleccionar área de pantalla
         </button>
@@ -94,8 +93,6 @@ useEffect(() => {
           <div>
             <h2>Última Imagen subida:</h2>
             <img src={imageUrl} alt="Imagen subida" />
-            <p>URL de la imagen: {imageUrl}</p>
-            <h1>Catálogo de ropa</h1>
             <ListaPrendas  imageUrl={imageUrl} />
         </div>)
     }
