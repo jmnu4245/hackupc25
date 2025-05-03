@@ -2,7 +2,8 @@
     "manifest_version": 3,
     "name": "Mi Extensión React",
     "version": "1.0",
-    "description": "Una extensión hecha con React y Vite",
+    "description": "Una extensión hecha con React, Vite y mucha, mucha magia.",
+    "author": "J. M. y P.",
     "action": {
       "default_popup": "index.html",
       "default_icon": "icon.png"

@@ -55,7 +55,7 @@ async function searchProducts(idToken) {
     const params = new URLSearchParams({
       'image': 'https://shop.rfef.es/cdn/shop/products/23CM0743_Z4.jpg',
       'page': 1,
-      'perPage': 50
+      'perPage': 3,
     });
 
     const response = await fetch(`${url}?${params}`, {

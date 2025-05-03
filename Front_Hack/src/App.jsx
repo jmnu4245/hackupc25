@@ -1,5 +1,7 @@
-import { useState, useEffect } from 'react';
-import './App.css';
+import { useState } from 'react'
+import Inditex_logo_black from '/Inditex_logo_black.svg'
+import './App.css'
+import ListaPrendas from './lista.jsx'
 
 function App() {
   const [scriptInjected, setScriptInjected] = useState(false);
@@ -47,7 +49,18 @@ function App() {
 
   return (
     <>
-      <h1>Captura</h1>
+      <div>
+        <a href="https://www.inditex.com" target="_blank">
+          <img src={Inditex_logo_black} className="logo" alt="Inditex logo" />
+        </a>
+
+      <div>
+        <h1>Catálogo de ropa</h1>
+        <ListaPrendas />
+      </div>
+
+      </div>
+      <h1>Encarni-chaaaan</h1>
       <div className="card">
         <button onClick={handleSelect}>
           Seleccionar área de pantalla
