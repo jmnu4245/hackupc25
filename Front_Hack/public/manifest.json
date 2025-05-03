@@ -1,26 +1,29 @@
 {
-    "manifest_version": 3,
-    "name": "Mi Extensión React",
-    "version": "1.0",
-    "description": "Una extensión hecha con React, Vite y mucha, mucha magia.",
-    "author": "J. M. y P.",
-    "action": {
-      "default_popup": "index.html",
-      "default_icon": "icon.png"
-    },
-    "permissions": [
-        "activeTab",
-        "scripting",
-        "storage",
-        "tabs",
-        "offscreen"
-    ],
-    "icons": {
-      "128": "icon.png"
-    
-    },
-    "host_permissions": [
-      "<all_urls>"
-    ]
+  "manifest_version": 3,
+  "name": "Mi Extensión React",
+  "version": "1.0",
+  "description": "Una extensión hecha con React, Vite y mucha, mucha magia.",
+  "author": "J. M. y P.",
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": "icon.png"
+  },
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "tabs",
+    "offscreen",
+    "http://*/",
+    "https://*/"
+  ],
+  "icons": {
+    "128": "icon.png"
+  },
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
   }
-  
+}

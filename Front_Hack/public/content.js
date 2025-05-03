@@ -23,7 +23,6 @@ if (window._extensionScriptLoaded) {
     startY = null;
     selectionDone = false;
     isDrawing = false;
-    capturedImageUrl = null;
     if (selectionBox) selectionBox.remove();
     if (controls) controls.remove();
     if (overlay) overlay.remove();
@@ -33,6 +32,7 @@ if (window._extensionScriptLoaded) {
   };
 
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    console.log("Mensaje recibido en content script:", request);
     if (request.action === "enableSelection") {
       console.log("[Extension] enableSelection recibido");
       capturedImageUrl = request.imageUrl;
@@ -225,12 +225,13 @@ if (window._extensionScriptLoaded) {
       if (result.success) {
         const publicUrl = result.data.link;
         console.log("✅ Imagen subida:", publicUrl);
-  
+        chrome.runtime.sendMessage({ action: "openPopup" });
         // Enviar la URL de la imagen al background script o popup
         chrome.runtime.sendMessage({
           action: "imgurUrlReady",
           url: publicUrl
         });
+
       } else {
         console.error("❌ Error al subir a Imgur:", result);
       }

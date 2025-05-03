@@ -11,6 +11,10 @@ export default defineConfig({
         {
           src: 'public/*',
           dest: '.' // los copia a dist/
+        },
+        {
+          src: 'src/background.js', // Asegúrate de que la ruta sea correcta
+          dest: '.' // Copia 'background.js' a 'dist/'
         }
       ]
     })

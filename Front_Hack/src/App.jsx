@@ -7,28 +7,50 @@ function App() {
   const [scriptInjected, setScriptInjected] = useState(false);
   const [imageUrl, setImageUrl] = useState(null);
 
+  // Función para guardar datos en chrome.storage.local
+  const saveData = (key, value) => {
+    chrome.storage.local.set({ [key]: value }, function() {
+      console.log('Datos guardados:', key, value);
+    });
+  };
+
+  // Función para recuperar datos de chrome.storage.local
+  const getData = (key, callback) => {
+    chrome.storage.local.get([key], function(result) {
+      callback(result[key]);
+    });
+  };
+
   // Escuchar mensajes del content script
   useEffect(() => {
     const handleMessages = (message, sender, sendResponse) => {
-      // Cuando la selección ha sido completada o cancelada, resetear el estado
+      console.log("Mensaje recibido:", message);
       if (message.action === "selectionConfirmed" || message.action === "selectionCancelled") {
         console.log("Selección completada o cancelada, reseteando estado");
         setScriptInjected(false);
       }
-      // Cuando la URL de la imagen está lista, actualizar el estado
       if (message.action === "imgurUrlReady") {
+        console.log("URL de la imagen lista:", message.url);
         setImageUrl(message.url);
+        saveData('imageUrl', message.url);
+        
       }
       return false;
     };
-
-    // Agregar el listener de mensajes
+  
     chrome.runtime.onMessage.addListener(handleMessages);
-
-    // Limpiar el listener cuando el componente se desmonta
     return () => {
       chrome.runtime.onMessage.removeListener(handleMessages);
     };
+  }, []);
+
+  // Recuperar datos al montar el componente
+  useEffect(() => {
+    getData('imageUrl', (url) => {
+      if (url) {
+        setImageUrl(url);
+      }
+    });
   }, []);
 
   const handleSelect = async () => {
@@ -59,12 +81,7 @@ function App() {
         <a href="https://www.inditex.com" target="_blank">
           <img src={Inditex_logo_black} className="logo" alt="Inditex logo" />
         </a>
-        {imageUrl && (
-        <div>
-          <h1>Catálogo de ropa</h1>
-          <ListaPrendas />
-        </div>)
-       }
+        
       </div>
       <h1>Encarni-chaaaan</h1>
       <div className="card">
@@ -75,7 +92,10 @@ function App() {
           <div>
             <h2>Imagen subida:</h2>
             <img src={imageUrl} alt="Imagen subida" />
-          </div>
+            <p>URL de la imagen: {imageUrl}</p>
+          <h1>Catálogo de ropa</h1>
+          <ListaPrendas />
+        </div>
         )}
       </div>
     </>
