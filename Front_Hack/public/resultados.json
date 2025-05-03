@@ -1,0 +1,41 @@
+[
+  {
+    "id": "438445190",
+    "name": "T-SHIRT WITH RAISED PRINT",
+    "price": {
+      "currency": "EUR",
+      "value": {
+        "current": 8.95,
+        "original": null
+      }
+    },
+    "link": "https://zara.com/es/en/-P07878709.html",
+    "brand": "zara"
+  },
+  {
+    "id": "432630992",
+    "name": "SWEATSHIRT WITH STRIPES AND SLOGAN",
+    "price": {
+      "currency": "EUR",
+      "value": {
+        "current": 12.95,
+        "original": null
+      }
+    },
+    "link": "https://zara.com/es/en/-P01880904.html",
+    "brand": "zara"
+  },
+  {
+    "id": "440211028",
+    "name": "CROCHET PRINT T-SHIRT",
+    "price": {
+      "currency": "EUR",
+      "value": {
+        "current": 10.95,
+        "original": null
+      }
+    },
+    "link": "https://zara.com/es/en/-P06208608.html",
+    "brand": "zara"
+  }
+]
