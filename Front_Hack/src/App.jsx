@@ -3,7 +3,15 @@ import Inditex_logo_black from '/inditex_logo_black.svg'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [count, setCount] = useState(0);
+
+  const handleSelect = async () => {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      files: ['contentScript.js']  // asegúrate de que está en public o build
+    });
+  };
 
   return (
     <>
@@ -15,18 +23,12 @@ function App() {
       </div>
       <h1>Encarni-chaaaan</h1>
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
+        <button onClick={handleSelect}>
+          Seleccionar área de pantalla
         </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
       </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
