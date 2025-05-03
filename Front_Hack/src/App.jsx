@@ -59,12 +59,6 @@ function App() {
         <a href="https://www.inditex.com" target="_blank">
           <img src={Inditex_logo_black} className="logo" alt="Inditex logo" />
         </a>
-        {imageUrl && (
-        <div>
-          <h1>Catálogo de ropa</h1>
-          <ListaPrendas />
-        </div>)
-       }
       </div>
       <h1>Encarni-chaaaan</h1>
       <div className="card">
@@ -75,8 +69,10 @@ function App() {
           <div>
             <h2>Imagen subida:</h2>
             <img src={imageUrl} alt="Imagen subida" />
-          </div>
-        )}
+            <h1>Catálogo de ropa</h1>
+            <ListaPrendas />
+          </div>)
+    }
       </div>
     </>
   );
