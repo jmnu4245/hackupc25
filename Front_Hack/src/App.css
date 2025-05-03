@@ -10,12 +10,25 @@
   padding: 1em;
   will-change: filter;
   transition: filter 300ms;
+  background: none;
+  border: none;
 }
 .logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+  filter: none;
 }
 .logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+  filter: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #121212;
+    color: #f0f0f0;
+  }
+
+  .logo {
+    filter: brightness(1.2) invert(1); /* si el logo es oscuro */
+  }
 }
 
 @keyframes logo-spin {
