@@ -95,8 +95,10 @@ function App() {
             <p>URL de la imagen: {imageUrl}</p>
           <h1>Catálogo de ropa</h1>
           <ListaPrendas />
-        </div>
-        )}
+            <h1>Catálogo de ropa</h1>
+            <ListaPrendas />
+        </div>)
+    }
       </div>
     </>
   );
