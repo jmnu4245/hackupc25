@@ -22,30 +22,30 @@ function App() {
   };
 
   // Escuchar mensajes del content script
-  useEffect(() => {
-    const handleMessages = (message, sender, sendResponse) => {
-      console.log("Mensaje recibido en App.jsx:", message);
-      if (message.action === "selectionConfirmed" || message.action === "selectionCancelled") {
-        console.log("Selección completada o cancelada, reseteando estado");
-        setScriptInjected(false);
-      }
-      if (message.action === "imgReady") {
-        console.log("URL de la imagen actualizada:", message.url);
-        setImageUrl(message.url);
-        saveData('imageUrl', message.url);
-      }
-      return false;
-    };
-  
-    // Agregar el listener de mensajes
-    chrome.runtime.onMessage.addListener(handleMessages);
-  
-    // Limpiar el listener cuando el componente se desmonta
-    return () => {
-      chrome.runtime.onMessage.removeListener(handleMessages);
-    };
-  }, []);
-  
+useEffect(() => {
+  const handleMessages = (message, sender, sendResponse) => {
+    console.log("Mensaje recibido en App.jsx:", message);
+    if (message.action === "selectionConfirmed" || message.action === "selectionCancelled") {
+      console.log("Selección completada o cancelada, reseteando estado");
+      setScriptInjected(false);
+    }
+    if (message.action === "imgReady") {
+      console.log("URL de la imagen actualizada:", message.url);
+      setImageUrl(message.url);
+      saveData('imageUrl', message.url);
+    }
+    return false;
+  };
+
+  // Agregar el listener de mensajes
+  chrome.runtime.onMessage.addListener(handleMessages);
+
+  // Limpiar el listener cuando el componente se desmonta
+  return () => {
+    chrome.runtime.onMessage.removeListener(handleMessages);
+  };
+}, []);
+
 
   // Recuperar datos al montar el componente
   useEffect(() => {
@@ -95,10 +95,8 @@ function App() {
             <h2>Última Imagen subida:</h2>
             <img src={imageUrl} alt="Imagen subida" />
             <p>URL de la imagen: {imageUrl}</p>
-          <h1>Catálogo de ropa</h1>
-          <ListaPrendas />
             <h1>Catálogo de ropa</h1>
-            <ListaPrendas />
+            <ListaPrendas  imageUrl={imageUrl} />
         </div>)
     }
       </div>

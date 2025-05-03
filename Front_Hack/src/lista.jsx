@@ -1,23 +1,35 @@
 import { useEffect, useState } from 'react';
 
-function ListaPrendas() {
+// Function to encode credentials for Basic Auth
+function getBasicAuthHeader(clientId, clientSecret) {
+  return 'Basic ' + Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+}
+
+function ListaPrendas({ imageUrl }) {
   const [prendas, setPrendas] = useState([]);
 
   useEffect(() => {
-    fetch('/resultados.json') // Aquí está el cambio
-      .then(response => response.json())
-      .then(data => {
-        const formateadas = data.map(prenda => ({
-          id: prenda.id,
-          nombre: prenda.name,
-          precio: prenda.price.value.current,
-          link: prenda.link,
-          marca: prenda.brand,
-        }));
-        setPrendas(formateadas);
-      })
-      .catch(error => console.error('Error al cargar prendas:', error));
-  }, []);
+    // Enviar mensaje al background script para cargar la lista de ropa
+    chrome.runtime.sendMessage({ action: "cargalistaropa", imageUrl: imageUrl });
+
+    // Manejar mensajes recibidos del background script
+    const handleMessages = (message, sender, sendResponse) => {
+      console.log("Mensaje recibido en App.jsx:", message);
+      if (message.action === "listaCargada") {
+        console.log("Lista recibida:", message.lista);
+        setPrendas(message.lista);
+      }
+      return false;
+    };
+
+    // Añadir el listener para mensajes
+    chrome.runtime.onMessage.addListener(handleMessages);
+
+    // Limpiar el listener cuando el componente se desmonte
+    return () => {
+      chrome.runtime.onMessage.removeListener(handleMessages);
+    };
+  }, [imageUrl]);
 
   return (
     <div>
