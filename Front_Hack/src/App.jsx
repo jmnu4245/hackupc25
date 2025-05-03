@@ -59,10 +59,12 @@ function App() {
         <a href="https://www.inditex.com" target="_blank">
           <img src={Inditex_logo_black} className="logo" alt="Inditex logo" />
         </a>
+        {imageUrl && (
         <div>
           <h1>Catálogo de ropa</h1>
           <ListaPrendas />
-        </div>
+        </div>)
+       }
       </div>
       <h1>Encarni-chaaaan</h1>
       <div className="card">
