@@ -1,4 +1,4 @@
-import {clientId ,clientSecret,tokenUrl} from './credentials.mjs';
+import {clientId ,clientSecret,tokenUrl} from './public/credentials.mjs';
 // Configure your credentials
 
 
