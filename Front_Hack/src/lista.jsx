@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import './globals.css';
 
-// Función para obtener la primera imagen con alt desde el servidor
 async function getImageFromServer(url) {
   try {
     const response = await fetch(`http://localhost:5000/obtener_imagen?url=${encodeURIComponent(url)}`);
@@ -18,14 +17,14 @@ async function getImageFromServer(url) {
 }
 
 function ListaPrendas({ imageUrl }) {
-  const [prendasData, setPrendasData] = useState([]); // Estado para la información básica de las prendas (sin imagen)
-  const [prendasConImagen, setPrendasConImagen] = useState([]); // Estado para las prendas con la URL de la imagen cargada
+  const [prendasData, setPrendasData] = useState([]);
+  const [prendasConImagen, setPrendasConImagen] = useState([]);
   const [loadingInicial, setLoadingInicial] = useState(true);
-  const [visibleItems, setVisibleItems] = useState(5);
+  const [visibleItems, setVisibleItems] = useState(2);
 
   useEffect(() => {
     setLoadingInicial(true);
-    setVisibleItems(5);
+    setVisibleItems(2);
     chrome.runtime.sendMessage({ action: "cargalistaropa", imageUrl: imageUrl });
 
     const handleMessages = async (message) => {
@@ -43,10 +42,14 @@ function ListaPrendas({ imageUrl }) {
 
   useEffect(() => {
     const cargarImagenesVisibles = async () => {
+      if (!Array.isArray(prendasData)) return;
+
       const nuevasPrendasConImagen = [...prendasConImagen];
+      if (prendasConImagen.length >= visibleItems) return;
+
       const prendasACargar = prendasData
         .slice(prendasConImagen.length, visibleItems)
-        .filter(prenda => !prendasConImagen.some(p => p.id === prenda.id)); // Evita cargar la misma prenda dos veces
+        .filter(prenda => !prendasConImagen.some(p => p.id === prenda.id));
 
       for (const prenda of prendasACargar) {
         const imagen = await getImageFromServer(prenda.link);
@@ -58,14 +61,12 @@ function ListaPrendas({ imageUrl }) {
     cargarImagenesVisibles();
   }, [visibleItems, prendasData]);
 
-  const prendasParaMostrar = prendasConImagen.slice(0, visibleItems);
-
   const handleVerMas = () => {
-    setVisibleItems(prev => Math.min(prev + 5, prendasData.length));
+    setVisibleItems(prev => Math.min(prev + 2, prendasData.length));
   };
 
   const handleVerMenos = () => {
-    setVisibleItems(prev => Math.max(prev - 5, 5)); // Asegura que no se muestren menos de 5
+    setVisibleItems(prev => Math.max(prev - 2, 2));
   };
 
   return (
@@ -75,17 +76,49 @@ function ListaPrendas({ imageUrl }) {
         <div className="loader">Cargando lista de prendas...</div>
       ) : (
         <>
-          {prendasParaMostrar.map(prenda => (
-            <div key={prenda.id} style={{ marginBottom: '1rem' }} className='card'>
-              <img src={prenda.imagen} alt={prenda.nombre} style={{ width: '100px', height: 'auto' }} />
-              <h3>{prenda.nombre}</h3>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <p>Precio: €{prenda.precio.toFixed(2)}</p>
-                <p>Marca: {prenda.marca}</p>
-              </div>
-              <a href={prenda.link} target="_blank" rel="noopener noreferrer">Ver producto</a>
-            </div>
-          ))}
+          {Array.isArray(prendasData) && prendasData.slice(0, visibleItems).map(prenda => {
+            const prendaConImagen = prendasConImagen.find(p => p.id === prenda.id);
+            return (
+              <a
+                key={prenda.id}
+                href={prenda.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ textDecoration: 'none', color: 'inherit' }}
+              >
+                <div
+                  className="card"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    marginBottom: '1rem',
+                    border: '1px solid #ccc',
+                    padding: '1rem',
+                    borderRadius: '8px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <img
+                    src={prendaConImagen?.imagen || ''}
+                    alt={prenda.nombre}
+                    style={{
+                      width: '100px',
+                      height: 'auto',
+                      marginRight: '1rem',
+                      backgroundColor: '#eee'
+                    }}
+                  />
+                  <div style={{ flexGrow: 1 }}>
+                    <h3>{prenda.nombre}</h3>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', gap: '1rem' }}>
+                      <div><strong>Marca:</strong> {prenda.marca}</div>
+                      <div><strong>Precio:</strong> €{prenda.precio.toFixed(2)}</div>
+                    </div>
+                  </div>
+                </div>
+              </a>
+            );
+          })}
           {prendasData.length > visibleItems && (
             <button
               onClick={handleVerMas}

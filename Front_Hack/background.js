@@ -92,7 +92,7 @@ async function searchProducts(idToken, imageUrl) {
         const params = new URLSearchParams({
             'image': imageUrl,
             'page': 1,
-            'perPage': 10,
+            'perPage': 6,
         });
 
         const response = await fetch(`${url}?${params}`, {
