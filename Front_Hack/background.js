@@ -21,6 +21,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             console.error('Error al cargar la lista de ropa:', error);
         });
     }
+
 });
 
 async function fetchPrendas(imageUrl) {

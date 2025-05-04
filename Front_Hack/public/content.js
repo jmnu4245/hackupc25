@@ -16,6 +16,8 @@ if (window._extensionScriptLoaded) {
   let selectionDone = false;
   let isDrawing = false;
   let capturedImageUrl = null;
+  let captureOverlay = null; // Nuevo elemento para mostrar la captura
+  let scrollPosition = { x: 0, y: 0 }; // Guardar la posición del scroll
 
   // Función global para reiniciar estado
   window._extensionResetState = function() {
@@ -26,9 +28,11 @@ if (window._extensionScriptLoaded) {
     if (selectionBox) selectionBox.remove();
     if (controls) controls.remove();
     if (overlay) overlay.remove();
+    if (captureOverlay) captureOverlay.remove(); // Eliminar el elemento de captura
     selectionBox = null;
     controls = null;
     overlay = null;
+    captureOverlay = null; // Reiniciar el elemento de captura
   };
 
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
@@ -36,7 +40,9 @@ if (window._extensionScriptLoaded) {
     if (request.action === "enableSelection") {
       console.log("[Extension] enableSelection recibido");
       capturedImageUrl = request.imageUrl;
+      showCaptureOverlay(capturedImageUrl); // Mostrar la captura
       bloquearInteraccion();
+
       sendResponse({ status: "interaccion bloqueada" });
     }
     if (request.action === "disableSelection") {
@@ -47,7 +53,29 @@ if (window._extensionScriptLoaded) {
     return true; // Indica que se manejará de forma asíncrona
   });
 
+  function showCaptureOverlay(imageUrl) {
+    // Crear el elemento de captura
+    captureOverlay = document.createElement("div");
+    captureOverlay.id = "capture-overlay-extension";
+    Object.assign(captureOverlay.style, {
+      position: "fixed",
+      top: "0",
+      left: "0",
+      width: "100vw",
+      height: "100vh",
+      backgroundImage: `url(${imageUrl})`,
+      backgroundSize: "cover",
+      backgroundPosition: "center",
+      zIndex: "999998", // Asegurarse de que esté por debajo del overlay y los controles
+      pointerEvents: "none" // Evitar interacciones con este elemento
+    });
+    document.body.appendChild(captureOverlay);
+  }
+
   function bloquearInteraccion() {
+    // Guardar la posición actual del scroll
+    scrollPosition = { x: window.scrollX, y: window.scrollY };
+
     // Limpiar cualquier selección anterior
     if (document.getElementById("bloqueo-overlay-extension")) {
       desbloquearInteraccion();
@@ -71,7 +99,7 @@ if (window._extensionScriptLoaded) {
       #bloqueo-overlay-extension { cursor: crosshair; }
       #selection-rect {
         position: absolute;
-        border: 2px dashed #007bff;
+        border: 2px dashed rgb(127, 130, 134);
         background-color: rgba(0,123,255,0.2);
         z-index: 1000000;
         pointer-events: none;
@@ -149,29 +177,28 @@ if (window._extensionScriptLoaded) {
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement("canvas");
-  
+
         // Ajuste por escala (caso típico: retina o pantallas con zoom)
         const scaleX = img.width / window.innerWidth;
         const scaleY = img.height / window.innerHeight;
-  
+
+        // Ajustar las coordenadas teniendo en cuenta la posición del scroll
         const x = (coords.x + window.scrollX) * scaleX;
         const y = (coords.y + window.scrollY) * scaleY;
         const width = coords.width * scaleX;
         const height = coords.height * scaleY;
-  
+
         canvas.width = width;
         canvas.height = height;
-  
+
         const ctx = canvas.getContext("2d");
         ctx.drawImage(img, x, y, width, height, 0, 0, width, height);
-  
+
         resolve(canvas.toDataURL("image/png"));
       };
       img.src = dataUrl;
     });
   }
-  
-  
 
   function dataURLtoBlob(dataUrl) {
     // Verificar si el Data URL está bien formado
@@ -180,49 +207,48 @@ if (window._extensionScriptLoaded) {
       console.error('Error: Data URL no tiene el formato correcto');
       return null;
     }
-  
+
     const mime = arr[0].match(/:(.*?);/);
     if (!mime) {
       console.error('Error: No se encontró el tipo MIME en el Data URL');
       return null;
     }
-  
+
     const mimeType = mime[1];
     const bstr = atob(arr[1]);  // Decodificar la parte base64
     const n = bstr.length;
     const u8arr = new Uint8Array(n);
-  
+
     // Rellenar el array Uint8Array con los datos decodificados
     for (let i = 0; i < n; i++) {
       u8arr[i] = bstr.charCodeAt(i);
     }
-  
+
     return new Blob([u8arr], { type: mimeType });
   }
-  
 
   async function handleAceptar(e) {
     e.stopPropagation();
     const rect = selectionBox.getBoundingClientRect();
-  
+
     const croppedDataUrl = await recortarImagen(capturedImageUrl, {
       x: rect.left,
       y: rect.top,
       width: rect.width,
       height: rect.height
     });
-  
+
     const blob = dataURLtoBlob(croppedDataUrl);
     const formData = new FormData();
     formData.append("image", blob);
     formData.append("type", "image");
     formData.append("title", "Imagen recortada");
     formData.append("description", "Descripción de la imagen recortada");
-  
+
     // Preparar encabezados con el Client-ID
     const myHeaders = new Headers();
     myHeaders.append("Authorization", "Client-ID e29bc4be5812582"); // Cambia por tu Client-ID
-  
+
     // Configurar la solicitud
     const requestOptions = {
       method: 'POST',
@@ -230,12 +256,12 @@ if (window._extensionScriptLoaded) {
       body: formData,
       redirect: 'follow'
     };
-  
+
     // Subir la imagen a Imgur
     try {
       const res = await fetch("https://api.imgur.com/3/image", requestOptions);
       const result = await res.json();
-  
+
       if (result.success) {
         const publicUrl = result.data.link;
         console.log("✅ Imagen subida:", publicUrl);
@@ -246,10 +272,9 @@ if (window._extensionScriptLoaded) {
     } catch (err) {
       console.error("❌ Fallo en subida:", err);
     }
-  
+
     finishSelection();
   }
-  
 
   function handleCancelar(e) {
     e.stopPropagation();
@@ -342,8 +367,13 @@ if (window._extensionScriptLoaded) {
     const style = document.getElementById("bloqueo-interaccion-extension");
     if (style) style.remove();
     if (overlay) overlay.remove();
+    if (captureOverlay) captureOverlay.remove(); // Eliminar el elemento de captura
     overlay = null;
     selectionBox = null;
     controls = null;
+    captureOverlay = null; // Reiniciar el elemento de captura
+
+    // Restaurar la posición del scroll
+    window.scrollTo(scrollPosition.x, scrollPosition.y);
   }
 }
