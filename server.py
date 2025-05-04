@@ -12,22 +12,31 @@ CORS(app)
 def obtener_primera_imagen_con_alt_selenium(url):
     try:
         options = Options()
-        options.headless = True  # Oculta la ventana
-        options.add_argument('--disable-gpu')  # Menor uso de recursos
-        options.add_argument('--no-sandbox')  # Necesario para algunos entornos
-        options.add_argument('--disable-dev-shm-usage')  # Evita errores en contenedores
-        options.add_argument('--blink-settings=imagesEnabled=false')  # No carga imágenes (opcional)
-        options.add_argument('--log-level=3')  # Menos logs
-
+        options.headless = True  # Modo headless original
+        options.add_argument('--disable-gpu')
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+        options.add_argument('--disable-software-rasterizer')  # Evita que aparezca el icono en la barra de tareas
+        options.add_argument('--blink-settings=imagesEnabled=false')
+        options.add_argument('--log-level=3')
+        options.add_experimental_option("excludeSwitches", ["enable-automation"])  # Oculta el mensaje "Chrome está siendo controlado por software automatizado"
+        
+        # Crear driver con las opciones
         driver = webdriver.Chrome(options=options)
         driver.get(url)
-
+        
+        # Configurar el timeout de espera
         wait = WebDriverWait(driver, 10)
         primera_imagen_con_alt = wait.until(EC.presence_of_element_located((By.XPATH, '//img[@alt]')))
+        
+        # Obtener datos
         src = primera_imagen_con_alt.get_attribute('src')
         alt = primera_imagen_con_alt.get_attribute('alt')
+        
+        # Cerrar navegador correctamente
         driver.quit()
         return {"src": src, "alt": alt}
+        
     except Exception as e:
         print(f"Error en Selenium: {e}")
         if 'driver' in locals():
@@ -39,6 +48,7 @@ def obtener_imagen_endpoint():
     url = request.args.get('url')
     if not url:
         return jsonify({"error": "Se requiere la URL"}), 400
+    
     resultado = obtener_primera_imagen_con_alt_selenium(url)
     if resultado:
         return jsonify(resultado)
