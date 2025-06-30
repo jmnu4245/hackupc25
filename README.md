@@ -44,5 +44,5 @@ Para que las imágenes de las prendas aparezcan correctamente, es necesario ejec
 
 ## Notas
 
-- Esta extensión solo funciona en Chrome.
+- Esta extensión solo se ha probado en Chrome aunque es posible que funcione en otros navegadores basados en Chromium.
 - El backend debe estar en ejecución para mostrar las prendas similares.
